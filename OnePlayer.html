@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+
+
+</head>
+<body>
+
+
+<canvas id="GameCanvas" style="background: black; margin-left: 250px;
+    margin-right: 200px;"  width="840" height="580"></canvas>
+
+<audio id="teck" src="audio/teck.m4a" ></audio>
+<audio id="lost" src="audio/lost.m4a" ></audio>
+
+<script>
+
+    var ball = new Image();
+    ball.src = "image/ball.png" ;
+
+    var teck = document.getElementById("teck");
+    var lost = document.getElementById("lost");
+
+
+    var tim ;
+    var c , ctx ,ply1 = 50 , ply2 = 50 ,rectW = 10 ,
+        rect1H = 100 , rect2H = 100,ballX = 50 , ballY = 50 ,xv = 5 ,yv = 4 ,score1 = 0 , score2 = 0 ,step = 3;
+    var run = false ;
+    window.onload = function () {
+        c = document.getElementById("GameCanvas");
+        ctx = c.getContext('2d');
+        document.onmousedown = function () {
+            if(run === false)
+                tim = setInterval(update , 1000/40);
+            run = true;
+        };
+
+        c.addEventListener('mousemove',function (e) {
+           ply1 = e.pageY - rect1H/2 ;
+        });
+        document.addEventListener("keypress", function (e) {
+            var key = e.keyCode ;
+            if(key === 119 && ply1 > 0){
+                ply1 -= 10 ;
+            }
+            else if (key === 115 && c.height >  ply1+ rect1H){
+                ply1 += 10 ;
+            }
+            else if(key === 13 && score1 === 5 || score2 === 5){
+                location.reload();
+            }
+
+        });
+
+
+    };
+
+    function update() {
+        var dy ;
+        ballX += xv ;
+        ballY += yv ;
+        if(ballY < 0 && yv < 0){
+            yv = -yv ;
+        }
+        if(ballY > c.height && yv > 0){
+            yv = -yv ;
+        }
+        if(ballX < rectW){
+            if(ballY >= ply1 && ballY <= ply1 + rect1H ){
+                xv = -xv ;
+                teck.play();
+                dy = ballY - (ply1 + rect1H /2);
+                if(dy < 0)
+                    yv = -4 ;
+                else
+                    yv = 4 ;
+                
+            }
+            else{
+                score2++ ;
+                lost.play();
+                rect1H -= 20;
+                reset();
+            }
+        }
+        if(ballX > (c.width - (rectW *2))){
+            if(ballY >= ply2 && ballY <= ply2 + rect2H){
+                xv = -xv ;
+                teck.play();
+                dy = ballY - (ply2 + rect2H /2);
+                if(dy < 0)
+                    yv = -4 ;
+                else
+                    yv = 4 ;
+            }
+            else{
+                score1++ ;
+                lost.play();
+                reset();
+            }
+        }
+
+
+        if(ply2 + (rect2H / 2) < ballY){
+            ply2 += step ;
+        }else{
+            ply2 -= step ;
+        }
+
+
+        ctx.clearRect(0,0,c.width,c.height);
+        ctx.fillStyle = "white" ;
+        ctx.fillRect(0 , ply1 , rectW , rect1H );
+        ctx.fillRect(c.width-10 , ply2 , rectW , rect2H );
+        ctx.drawImage(ball , ballX , ballY , 12 , 12);
+        ctx.font = "20px atalic";
+        ctx.fillText(score1 , 100 , 100 );
+        ctx.fillText(score2 , c.width-100 , 100 );
+
+        if(score1 === 5){
+            ctx.fillStyle = "red";
+            ctx.font = "50px atilc";
+            ctx.fillText("YOU WIN " , c.width/3 , c.height/2 );
+            clearInterval(tim);
+
+        }
+        else if(score2 === 5){
+            ctx.fillStyle = "red";
+            ctx.font = "50px atilc";
+            ctx.fillText( "GAME OVER. " , c.width/3 , c.height/2 );
+            clearInterval(tim);
+
+        }
+    }
+    function reset() {
+        ballX = c.width/2 ;
+        ballY = c.height/2 ;
+        xv = -xv ;
+        yv = 4 ;
+
+    }
+
+</script>
+
+
+</body>
+</html>
